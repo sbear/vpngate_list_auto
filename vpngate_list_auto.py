@@ -3,7 +3,7 @@ import urllib2
 import re
 import base64
 import socket
-import os, glob
+import os, glob, sys, shutil
 
 vpn_list = 'http://enigmatic-scrubland-4484.herokuapp.com/'
 
@@ -22,6 +22,51 @@ def tcp_port_is_open(ip, port) :
         return True
     else :
         return False
+
+
+def save_config_file(result) :
+    ''' '''
+
+    os_str = sys.platform.lower()
+    if os_str == 'darwin': # os x
+        config_path = '/Users/%s/Library/Application Support/Tunnelblick/Configurations' % os.getlogin()
+    elif os_str == 'win32':
+        if os_bit == '64bit':
+            config_path = 'C:\Program Files (x86)\OpenVPN\config'
+        else:
+            config_path = 'C:\Program Files\OpenVPN\config'
+    else:
+        loging.error("unkonw os type")
+
+
+    # rm old config files
+    os.chdir(config_path) # will auto die if chdir fail
+    backup_dir = 'vpngate_old'
+
+    if not os.path.isdir(backup_dir):
+        os.mkdir(backup_dir)
+
+    for item in glob.glob('vpngate*'):
+        shutil.move(item, backup_dir)
+
+
+    # save config file
+    # write to file, every conutry limit 3 server
+    for country in result:
+        for server in result[country][0:3]:
+            file_name = '_'.join(['vpngate', country, server['ip']]) + '.ovpn'
+            print file_name
+            f = open(file_name, 'w')
+            f.write(server['config'])
+            f.close
+
+
+        
+
+
+
+
+
 
 
 
@@ -66,7 +111,9 @@ if res.getcode() == 200 :
         else :
             break
     
-    #print result
+    save_config_file(result) 
+    '''
+   #print result
 
     # rm old file
     config_path = 'C:\Program Files\OpenVPN\config'
@@ -83,6 +130,8 @@ if res.getcode() == 200 :
             f = open(file_name, 'w')
             f.write(server['config'])
             f.close()
+
+    '''
 
 else :
     print res.getcode()
