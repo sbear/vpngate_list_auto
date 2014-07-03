@@ -42,10 +42,10 @@ def save_config_file(result) :
     # rm old config files
     os.chdir(config_path) # will auto die if chdir fail
     backup_dir = 'vpngate_old'
+    shutil.rmtree(backup_dir)
+    os.mkdir(backup_dir)
 
-    if not os.path.isdir(backup_dir):
-        os.mkdir(backup_dir)
-
+    # backup config files
     for item in glob.glob('vpngate*'):
         shutil.move(item, backup_dir)
 
@@ -59,15 +59,6 @@ def save_config_file(result) :
             f = open(file_name, 'w')
             f.write(server['config'])
             f.close
-
-
-        
-
-
-
-
-
-
 
 
 if res.getcode() == 200 :
